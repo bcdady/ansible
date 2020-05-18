@@ -1,0 +1,65 @@
+---
+# This playbook has just 1 play:
+# to make sure basic tools/packages are available on my MacBook
+
+# Ensure core packages are installed / available through homebrew packages
+- name: Ensure homebrew packages
+  hosts: localhost
+  tasks:
+  # name: file copy example
+  #  - copy:
+  #     src: "master.gitconfig"
+  #    dest: "~/.gitconfig"
+  - name: homebrew-ansible
+    homebrew:
+      name: ansible
+      state: latest
+  - name: homebrew-awscli
+    homebrew:
+      name: awscli
+      state: latest
+  - name: homebrew bat
+    homebrew:
+      name: bat
+      state: absent
+  - name: homebrew mysql-client
+    homebrew:
+      name: mysql-client
+      state: latest
+  - name: homebrew percona-toolkit
+    homebrew:
+      name: percona-toolkit
+      state: latest
+  - name: homebrew pipenv
+    homebrew:
+      name: pipenv
+      state: latest
+  - name: homebrew python
+    homebrew:
+      name: python
+      state: latest
+  - name: homebrew tmux
+    homebrew:
+      name: tmux
+      state: latest
+
+  - name: homebrew cask meld
+    homebrew_cask:
+      name: meld
+      state: present
+  - name: homebrew cask powershell
+    homebrew_cask:
+      name: powershell
+      state: present
+  - name: homebrew cask QuickLook Image Size
+    homebrew_cask:
+      name: qlimagesize
+      state: present
+  - name: homebrew cask QuickLook Markdown
+    homebrew_cask:
+      name: qlmarkdown
+      state: present
+  - name: homebrew cask QuickLook JSON
+    homebrew_cask:
+      name: quicklook-json
+      state: present

@@ -1,0 +1,82 @@
+---
+# This playbook has 3 plays:
+# 1. make sure the .gitconfig file exists
+# 2. set/update the [user] values in the .gitconfig file
+# 3. provide 'debug' message for visually validating results with `git config`
+
+- name: "Ensure .gitconfig exists"
+  hosts: localhost
+  vars:
+    git_file:  "~/.gitconfig"
+  tasks:
+  - name: "Check if gitconfig file ({{ git_file }}) exists"
+    stat:
+      path: "{{ git_file }}"
+    register: st
+  - debug:
+      msg: "File {{ git_file }} did not exist, so it will now be created." #    Run this playbook again to populate the new (empty) file with gitconfig values." 
+    when: st.stat.isreg is not defined
+  - name: Create gitconfig file
+    file:
+      path: "{{ git_file }}"
+      state: touch
+      # mode: "u=rw,g=r,o=r"
+    when: st.stat.isreg is not defined
+
+- name: "Ensure .gitconfig contents are set"
+  hosts: localhost
+  vars:
+    git_file:  "~/.gitconfig"
+    git_email: "{{ ansible_env.GIT_USEREMAIL }}"
+    git_name:  "{{ ansible_env.GIT_USERNAME }}"
+  tasks:
+  - name: Check if GIT_USEREMAIL are set in ENV
+    fail:
+      msg: "Env variable GIT_USEREMAIL is NOT set"
+    when: ansible_env.GIT_USEREMAIL is not defined
+
+  - name: Check if GIT_USERNAME are set in ENV
+    fail:
+      msg: "Env variable GIT_USERNAME is NOT set"
+    when: ansible_env.GIT_USERNAME is not defined
+
+  - name: "Check if gitconfig file ({{ git_file }}) exists"
+    stat:
+      path: "{{ git_file }}"
+    register: st
+  - debug:
+      msg: "File {{ git_file }} does not exist, so it will now be created.    Run this playbook again to populate the new (empty) file with gitconfig values." 
+    when: st.stat.isreg is not defined
+  - name: Create gitconfig file
+    file:
+      path: "{{ git_file }}"
+      state: touch
+      # mode: "u=rw,g=r,o=r"
+    when: st.stat.isreg is not defined
+  - name: Ensure [user] is set in gitconfig
+    blockinfile:
+      path: "{{ git_file }}"
+      block: |
+        [user]
+            name  = {{ git_name }}
+            email = {{ git_email }}
+    when: st.stat.isreg is defined
+
+  # - lineinfile:
+  #     path: /etc/services
+  #     regexp: '^# port for http'
+  #     insertbefore: '^www.*80/tcp'
+  #     line: '# port for http by default'
+
+- name: "Results"
+  hosts: localhost
+  vars:
+    git_file:  "~/.gitconfig"
+  tasks:
+  - name: "Conirm gitconfig file exists"
+    stat:
+      path: "{{ git_file }}"
+    register: st
+  # ad-hoc edition: ansible -m command -a "git config --global --list" localhost
+  - name: "Final Message"
+    debug: msg="To view results, run git config --file {{ git_file }} --list"
